@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Frete - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+        .tab-active { background-color: #1f2937; border-bottom: 2px solid #3b82f6; }
+        .tab-inactive { background-color: #374151; }
+        .login-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%); }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-white">
+    
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center login-bg">
+        <div class="absolute inset-0 bg-black opacity-50"></div>
+        <div class="relative z-10 bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-700">
+            <!-- Logo/Header -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <svg class="h-10 w-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h1 class="text-3xl font-bold text-white">Orçamento Rápido</h1>
+                </div>
+                <p class="text-gray-400">Faça login para acessar a calculadora</p>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form id="loginForm" class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-gray-300 text-sm font-medium">Usuário</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <input 
+                            id="username"
+                            type="text" 
+                            placeholder="Digite seu usuário"
+                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 pr-4 py-3 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                            autocomplete="username"
+                        />
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-gray-300 text-sm font-medium">Senha</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <input 
+                            id="password"
+                            type="password" 
+                            placeholder="Digite sua senha"
+                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 pr-12 py-3 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                            autocomplete="current-password"
+                        />
+                        <button 
+                            type="button"
+                            onclick="togglePassword()"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        >
+                            <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mensagem de erro -->
+                <div id="errorMessage" class="hidden bg-red-900/20 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm">
+                    <div class="flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Usuário ou senha incorretos!</span>
+                    </div>
+                </div>
+
+                <!-- Botão de Login -->
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    Entrar
+                </button>
+            </form>
+
+            <!-- Dica de Login -->
+            <div class="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
+                <div class="flex items-start gap-2">
+                    <svg class="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h4 class="text-blue-300 font-medium text-sm">Acesso Administrativo</h4>
+                        <p class="text-blue-200 text-xs mt-1">Use as credenciais fornecidas pelo administrador do sistema.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-8 text-center">
+                <p class="text-gray-500 text-xs">© 2024 Orçamento Rápido - Sistema de Precificação</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aplicação Principal (inicialmente oculta) -->
+    <div id="mainApp" class="hidden">
+        <div class="max-w-6xl mx-auto p-6">
+            <!-- Header com Logout -->
+            <div class="flex justify-between items-center mb-12">
+                <div class="text-center flex-1">
+                    <div class="flex items-center justify-center gap-3 mb-4">
+                        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <h1 class="text-4xl font-light tracking-wide">Orçamento Rápido</h1>
+                    </div>
+                    <p class="text-gray-400 text-lg font-light">Calcule preços de forma simples e rápida</p>
+                </div>
+                
+                <!-- Botão de Logout -->
+                <button 
+                    onclick="logout()"
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Sair
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-8">
+                <div class="flex border-b border-gray-700">
+                    <button 
+                        onclick="switchTab('calculator')" 
+                        id="tab-calculator"
+                        class="px-6 py-3 text-sm font-medium text-white tab-active rounded-t-lg"
+                    >
+                        Calculadora
+                    </button>
+                    <button 
+                        onclick="switchTab('tips')" 
+                        id="tab-tips"
+                        class="px-6 py-3 text-sm font-medium text-gray-300 tab-inactive rounded-t-lg ml-2"
+                    >
+                        Dicas & Tabelas
+                    </button>
+                    <button 
+                        onclick="switchTab('films')" 
+                        id="tab-films"
+                        class="px-6 py-3 text-sm font-medium text-gray-300 tab-inactive rounded-t-lg ml-2"
+                    >
+                        Películas Compatíveis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calculator Tab -->
+            <div id="calculator-tab" class="tab-content">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Inputs Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Pesquisa de Preços -->
+                        <div class="bg-gray-900 p-6 rounded-lg space-y-4">
+                            <div class="flex items-center gap-2 mb-4">
+                                <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-3m0-6v-3m0 3h3m-3 0h-3"></path>
+                                </svg>
+                                <h3 class="text-lg font-medium text-white">Pesquisar Valor Médio</h3>
+                                <span class="text-xs text-gray-400">(Local)</span>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <input 
+                                    id="nomePeca"
+                                    type="text" 
+                                    placeholder="Ex: a10, a32, iphone 11, display, samsung, motorola..."
+                                    class="flex-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-blue-400 focus:outline-none"
+                                    onkeypress="if(event.key==='Enter') searchPrices()"
+                                />
+                                <button 
+                                    onclick="searchPrices()"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2"
+                                    id="searchBtn"
+                                >
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Status da busca -->
+                            <div id="searchStatus" class="hidden bg-gray-800 p-4 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="h-4 w-4 animate-spin text-blue-400" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span class="text-white">Pesquisando...</span>
+                                </div>
+                            </div>
+
+                            <!-- Resultados da busca -->
+                            <div id="searchResults" class="hidden mt-6 space-y-4"></div>
+                        </div>
+
+                        <!-- Inputs de Cálculo -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-gray-300 text-sm font-medium">Valor da Peça</label>
+                                <input 
+                                    id="valorPeca"
+                                    type="number" 
+                                    value="90"
+                                    step="0.01"
+                                    class="w-full bg-gray-900 border border-gray-800 text-white text-lg h-12 rounded-md px-3 focus:border-white focus:outline-none"
+                                    onchange="updateMarginAndCalculate()"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-gray-300 text-sm font-medium">
+                                    Margem de Lucro (%) 
+                                    <span id="marginSuggestion" class="text-blue-400 text-xs"></span>
+                                </label>
+                                <input 
+                                    id="margemLucro"
+                                    type="number" 
+                                    value="70"
+                                    step="0.1"
+                                    class="w-full bg-gray-900 border border-gray-800 text-white text-lg h-12 rounded-md px-3 focus:border-white focus:outline-none"
+                                    onchange="calculateValues()"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-gray-300 text-sm font-medium">Frete</label>
+                                <input 
+                                    id="frete"
+                                    type="number" 
+                                    value="20"
+                                    step="0.01"
+                                    class="w-full bg-gray-900 border border-gray-800 text-white text-lg h-12 rounded-md px-3 focus:border-white focus:outline-none"
+                                    onchange="calculateValues()"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-gray-300 text-sm font-medium">
+                                    Mão de Obra 
+                                    <span id="laborSuggestion" class="text-green-400 text-xs"></span>
+                                </label>
+                                <input 
+                                    id="maoDeObra"
+                                    type="number" 
+                                    value="120"
+                                    step="0.01"
+                                    class="w-full bg-gray-900 border border-gray-800 text-white text-lg h-12 rounded-md px-3 focus:border-white focus:outline-none"
+                                    onchange="calculateValues()"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-gray-300 text-sm font-medium">Taxa da Máquina (%)</label>
+                                <input 
+                                    id="taxaMaquina"
+                                    type="number" 
+                                    value="6"
+                                    step="0.1"
+                                    class="w-full bg-gray-900 border border-gray-800 text-white text-lg h-12 rounded-md px-3 focus:border-white focus:outline-none"
+                                    onchange="calculateValues()"
+                                />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-gray-300 text-sm font-medium">Imposto (%)</label>
+                                <input 
+                                    id="imposto"
+                                    type="number" 
+                                    value="4"
+                                    step="0.1"
+                                    class="w-full bg-gray-900 border border-gray-800 text-white text-lg h-12 rounded-md px-3 focus:border-white focus:outline-none"
+                                    onchange="calculateValues()"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div class="space-y-6">
+                        <div class="space-y-4">
+                            <div class="bg-gray-900 p-6 rounded-lg">
+                                <p class="text-gray-400 text-sm mb-2">Custo Total</p>
+                                <p id="valorFinalPeca" class="text-2xl font-light text-white">R$ 0,00</p>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-900 to-green-800 p-6 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="h-4 w-4 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                    <p class="text-green-300 text-sm">À Vista</p>
+                                </div>
+                                <p id="valorAVista" class="text-3xl font-light text-white">R$ 0,00</p>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-6 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="h-4 w-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                    </svg>
+                                    <p class="text-blue-300 text-sm">No Cartão</p>
+                                </div>
+                                <p id="valorNoCartao" class="text-3xl font-light text-white">R$ 0,00</p>
+                            </div>
+
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <p class="text-gray-400 text-xs mb-1">Diferença</p>
+                                <p id="diferenca" class="text-lg font-light text-gray-300">R$ 0,00</p>
+                            </div>
+
+                            <!-- Botão Gerar PDF -->
+                            <button 
+                                onclick="openPDFModal()"
+                                class="w-full bg-white text-black hover:bg-gray-200 h-12 text-lg font-medium rounded-md flex items-center justify-center gap-2"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Gerar Orçamento PDF
+                            </button>
+
+                            <!-- Botão Instagram -->
+                            <button 
+                                onclick="window.open('https://www.instagram.com/officialmayconsantos?igsh=MW4wbTZoZG50cXR3Yw==', '_blank')"
+                                class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white h-12 text-lg font-medium rounded-md flex items-center justify-center gap-2"
+                            >
+                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.042-3.441.219-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.888-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.357-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"></path>
+                                </svg>
+                                Seguir no Instagram
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips Tab -->
+            <div id="tips-tab" class="tab-content hidden">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Tabela de Margem -->
+                    <div class="bg-gray-900 p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Tabela de Margem por Valor
+                        </h3>
+                        
+                        <div class="overflow-hidden rounded-lg border border-gray-700">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-800">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-white font-medium">Valor da Tela</th>
+                                        <th class="px-4 py-3 text-left text-white font-medium">% Margem</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-700">
+                                    <tr class="bg-orange-900/20">
+                                        <td class="px-4 py-3 text-orange-300">Telas até R$ 100</td>
+                                        <td class="px-4 py-3 text-white font-semibold">65%</td>
+                                    </tr>
+                                    <tr class="bg-yellow-900/20">
+                                        <td class="px-4 py-3 text-yellow-300">Telas até R$ 200</td>
+                                        <td class="px-4 py-3 text-white font-semibold">70%</td>
+                                    </tr>
+                                    <tr class="bg-green-900/20">
+                                        <td class="px-4 py-3 text-green-300">Telas até R$ 300</td>
+                                        <td class="px-4 py-3 text-white font-semibold">75%</td>
+                                    </tr>
+                                    <tr class="bg-blue-900/20">
+                                        <td class="px-4 py-3 text-blue-300">Telas até R$ 400</td>
+                                        <td class="px-4 py-3 text-white font-semibold">80%</td>
+                                    </tr>
+                                    <tr class="bg-purple-900/20">
+                                        <td class="px-4 py-3 text-purple-300">Telas até R$ 500</td>
+                                        <td class="px-4 py-3 text-white font-semibold">95%</td>
+                                    </tr>
+                                    <tr class="bg-red-900/20">
+                                        <td class="px-4 py-3 text-red-300">Tela acima de R$ 500</td>
+                                        <td class="px-4 py-3 text-white font-semibold">100%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Dicas de Mão de Obra -->
+                    <div class="bg-gray-900 p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Dicas de Mão de Obra
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-blue-900/20 border border-blue-700 p-4 rounded-lg">
+                                <h4 class="text-blue-300 font-medium mb-2">💡 Regra Geral</h4>
+                                <p class="text-gray-300 text-sm">
+                                    Considerar mão de obra de acordo com a <strong>complexidade e risco</strong> do aparelho a ser consertado, variando de <strong>R$ 80 a R$ 250</strong>.
+                                </p>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                                    <span class="text-gray-300">📱 Aparelhos Simples</span>
+                                    <span class="text-green-400 font-semibold">R$ 80 - R$ 120</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                                    <span class="text-gray-300">📱 Aparelhos Médios</span>
+                                    <span class="text-yellow-400 font-semibold">R$ 120 - R$ 180</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                                    <span class="text-gray-300">📱 Aparelhos Complexos</span>
+                                    <span class="text-red-400 font-semibold">R$ 180 - R$ 250</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-900/20 border border-yellow-700 p-4 rounded-lg">
+                                <h4 class="text-yellow-300 font-medium mb-2">⚠️ Fatores a Considerar</h4>
+                                <ul class="text-gray-300 text-sm space-y-1">
+                                    <li>• Dificuldade de abertura</li>
+                                    <li>• Risco de quebra</li>
+                                    <li>• Tempo de reparo</li>
+                                    <li>• Valor do aparelho</li>
+                                    <li>• Disponibilidade de peças</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colinha Flutuante -->
+                <div class="fixed bottom-4 right-4 bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-2xl max-w-xs z-50">
+                    <h4 class="text-white font-medium mb-2 text-sm">📋 Colinha Rápida</h4>
+                    <div class="text-xs space-y-1">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">≤ R$ 100:</span>
+                            <span class="text-orange-400">65%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">≤ R$ 200:</span>
+                            <span class="text-yellow-400">70%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">≤ R$ 300:</span>
+                            <span class="text-green-400">75%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">≤ R$ 400:</span>
+                            <span class="text-blue-400">80%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">≤ R$ 500:</span>
+                            <span class="text-purple-400">95%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">> R$ 500:</span>
+                            <span class="text-red-400">100%</span>
+                        </div>
+                        <hr class="border-gray-700 my-2">
+                        <div class="text-center text-gray-400">
+                            <span class="text-xs">Mão de obra: R$ 80-250</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Films Tab -->
+            <div id="films-tab" class="tab-content hidden">
+                <div class="bg-gray-900 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg class="h-5 w-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        Buscar Películas Compatíveis
+                    </h3>
+                    
+                    <div class="mb-6">
+                        <div class="flex gap-3">
+                            <input 
+                                id="filmSearch"
+                                type="text" 
+                                placeholder="Digite o modelo do celular (ex: A22, iPhone 11, Moto G52...)"
+                                class="flex-1 bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-purple-400 focus:outline-none"
+                                onkeypress="if(event.key==='Enter') searchFilms()"
+                            />
+                            <button 
+                                onclick="searchFilms()"
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md flex items-center gap-2"
+                                id="filmSearchBtn"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Status da busca de películas -->
+                    <div id="filmSearchStatus" class="hidden bg-gray-800 p-4 rounded-lg mb-4">
+                        <div class="flex items-center gap-2">
+                            <svg class="h-4 w-4 animate-spin text-purple-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-white">Buscando compatibilidade...</span>
+                        </div>
+                    </div>
+
+                    <!-- Resultados da busca de películas -->
+                    <div id="filmSearchResults" class="hidden space-y-4"></div>
+
+                    <!-- Dica de uso -->
+                    <div class="bg-purple-900/20 border border-purple-700 p-4 rounded-lg">
+                        <div class="flex items-start gap-2">
+                            <svg class="h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-purple-300 font-medium text-sm">💡 Como usar</h4>
+                                <p class="text-purple-200 text-xs mt-1">Digite o modelo do celular para encontrar quais películas são compatíveis. Ex: "A22", "iPhone 11", "Moto G52"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Todos os modais (mesmo código anterior) -->
+    <!-- Modal PDF -->
+    <div id="pdfModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-900 border border-gray-800 text-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="text-lg font-medium">Gerar Orçamento PDF</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Preencha os dados abaixo para gerar um orçamento profissional</p>
+            
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-gray-300">Nome da Empresa</label>
+                    <input 
+                        id="nomeEmpresa"
+                        type="text" 
+                        placeholder="Digite o nome da sua empresa"
+                        class="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-white focus:outline-none"
+                    />
+                </div>
+                <div class="space-y-2">
+                    <label class="text-gray-300">Serviço a ser Realizado</label>
+                    <textarea 
+                        id="servico"
+                        placeholder="Descreva o serviço que será prestado"
+                        class="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-white focus:outline-none min-h-[100px]"
+                    ></textarea>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button 
+                        onclick="closePDFModal()"
+                        class="flex-1 border border-gray-700 text-gray-300 hover:bg-gray-800 py-2 rounded-md"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onclick="gerarPDF()"
+                        class="flex-1 bg-white text-black hover:bg-gray-200 py-2 rounded-md flex items-center justify-center gap-2"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Gerar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Produto -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-900 border border-gray-800 text-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <h3 class="text-lg font-medium">Adicionar Novo Produto</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Adicione um novo produto à base de dados local.</p>
+            
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-gray-300">Nome do Produto</label>
+                    <input 
+                        id="newProductName"
+                        type="text" 
+                        placeholder="Ex: Display Samsung A51"
+                        class="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-white focus:outline-none"
+                    />
+                </div>
+                <div class="space-y-2">
+                    <label class="text-gray-300">Preço do Produto</label>
+                    <input 
+                        id="newProductPrice"
+                        type="number" 
+                        placeholder="Ex: 150.00"
+                        class="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-white focus:outline-none"
+                    />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button 
+                        onclick="closeAddModal()"
+                        class="flex-1 border border-gray-700 text-gray-300 hover:bg-gray-800 py-2 rounded-md"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onclick="addNewProduct()"
+                        class="flex-1 bg-white text-black hover:bg-gray-200 py-2 rounded-md"
+                    >
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Produto -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-900 border border-gray-800 text-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <h3 class="text-lg font-medium">Editar Preço</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Edite o preço do produto selecionado.</p>
+            
+            <div class="space-y-4">
+                <p id="editProductName" class="text-gray-300"></p>
+                <div class="space-y-2">
+                    <label class="text-gray-300">Novo Preço</label>
+                    <input 
+                        id="editProductPrice"
+                        type="number" 
+                        placeholder="Ex: 150.00"
+                        class="w-full bg-gray-800 border border-gray-700 text-white rounded-md px-3 py-2 focus:border-white focus:outline-none"
+                    />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button 
+                        onclick="closeEditModal()"
+                        class="flex-1 border border-gray-700 text-gray-300 hover:bg-gray-800 py-2 rounded-md"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onclick="editProduct()"
+                        class="flex-1 bg-white text-black hover:bg-gray-200 py-2 rounded-md"
+                    >
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados iniciais do banco de dados
+        const initialDatabase = [
+            { produto: "DISPLAY SAM A10 / A105 M10 / M105 (ORG C/ ARO)", preco: 90.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY SAM A10 / A105 M10 / M105 (S/ ARO)", preco: 70.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY SAM A20 / A205 (OLED C/ ARO)", preco: 170.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY SAM A32 4G / A325 (OLED C/ ARO)", preco: 195.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY SAM A34 5G / A346 (ORG NACIONAL PRETO)", preco: 599.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY IPHONE 11 (OLED C/ ARO)", preco: 180.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY IPHONE 12 (OLED C/ ARO)", preco: 220.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY MOTO G10 / G20 / G30 (C/ ARO ORG)", preco: 100.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY XIAOMI REDMI NOTE 11 4G (C/ ARO AMOLED WEFIX)", preco: 260.0, disponivel: true, pagina: 1 },
+            { produto: "DISPLAY REALME C35 (C/ ARO)", preco: 140.0, disponivel: true, pagina: 1 }
+        ];
+
+        let localDatabase = [];
+        // Banco de dados de películas compatíveis
+        const filmsDatabase = [
+            { model: "SAMSUNG A22", compatible: ["SAMSUNG M32", "A33", "M31", "A32 4G"] },
+            { model: "SAMSUNG M32", compatible: ["SAMSUNG A22", "M22"] },
+            { model: "LG K52", compatible: ["K62", "MOTO G51", "A11", "MOTO ONE FUSION", "POCO F3", "XIAOMI MI 11 LIGTH", "MOTO G71", "XIAOMI MI 11", "REALME C6 PRO", "A11"] },
+            { model: "MOTO EDGE 30 PRO", compatible: ["A52", "MOTO G8", "MOTO G52", "A11", "MOTO G41", "XIAOMI 11 LITE", "POCO M3", "REALME C6 PRO"] },
+            { model: "M51", compatible: ["REALME C6 PRO", "MOTO G 71", "A11", "A71", "A21S", "A21", "S20 FE", "A52", "G62", "REDMI NOTE 10 PRO", "A73"] },
+            { model: "XIAOMI MI 10 T", compatible: ["A73", "A11", "POCO F3", "MOTO G 71", "MOTO G41", "REALME C6 PRO", "MOTO G52", "A21S", "A21", "A52"] },
+            { model: "XIAOMI REDMI NOTE 10 PRO", compatible: ["REALME C6 PRO", "G71", "M51", "A21S", "A21", "A11", "A52", "MOTO ONE FUSION", "XIAOMI MI 11i", "REDMI NOTE 10"] },
+            { model: "XIAOMI REDMI NOTE 1 PRO MAX", compatible: ["REALME C6 PRO", "G71", "M51", "A21S", "A21", "A11", "A52", "MOTO ONE FUSION", "XIAOMI MI 11i", "REDMI NOTE 10 PRO"] },
+            { model: "LG K50", compatible: ["MOTO ONE ZOOM", "LG K50", "LG X6", "LG Q60", "LG K12 PRIME", "A20", "REALME C6 PRO"] },
+            { model: "MOTO EDGE X30", compatible: ["A52", "MOTO G8", "MOTO G52", "A11", "MOTO G41", "G62", "POCO M3", "REALME C6 PRO"] },
+            { model: "MOTO G52", compatible: ["A73", "M51", "A52", "A71", "A72", "A21S", "A21", "MOTO G STYLUS", "REDMI NOTE 10", "REDMI NOTE 10S", "REDMI NOTE 10 PRO", "MI 11 i", "XIAOMI MI 11 LITE"] },
+            { model: "REDMI NOTE 10", compatible: ["REDMI NOTE 10S", "A53", "REALME 7 PROM", "XIAOMI 11 LITE"] },
+            { model: "REDMI NOTE 11", compatible: ["REALME 6 PRO", "REDIMI NOTE 10S", "REDMI NOTE 10", "MOTO G52"] },
+            { model: "REDMI NOTE 11S", compatible: ["REALME 6 PRO", "REDIMI NOTE 10S", "REDMI NOTE 10", "MOTO G52"] },
+            { model: "MOTO EDGE 20", compatible: ["A80", "A70", "MOTOROLA EDGE X30", "MOTOROLA EDGE X30 PRO"] },
+            { model: "MOTO G41", compatible: ["MOTOG 31", "MOTO G52", "G71", "REDMI NOTE 10", "G52", "REALME 7 PRO", "A11"] },
+            { model: "SAMSUNG M52", compatible: ["MOTO G52", "A53", "A52", "A72", "REDIMI NOTE 12"] },
+            { model: "REALME 7 PRO", compatible: ["SAMSUNG A11", "MOTO G 41", "REDMI NOTE 10"] },
+            { model: "REDMI 9A", compatible: ["A23", "A12", "A32", "MOTO E 7 PLUS", "A23", "A03S", "REDMI 9 POWER", "REDMI 9T", "REALME C11", "REALME C25", "POCO M3", "REDMI 9C", "REDMI 9I"] },
+            { model: "REDMI 9C", compatible: ["A23", "A12", "A32", "MOTO E 7 PLUS", "A23", "A03S", "REDMI 9 POWER", "REDMI 9T", "REALME C11", "REALME C25", "POCO M3", "REDMI 9A", "REDMI 9I"] },
+            { model: "REDMI 9I", compatible: ["A23", "A12", "A32", "MOTO E 7 PLUS", "A23", "A03S", "REDMI 9 POWER", "REDMI 9T", "REALME C11", "REALME C25", "POCO M3", "REDMI 9A", "REDMI 9C"] },
+            { model: "MOTO ONE ZOOM", compatible: ["A10", "G8 Play", "G8 Plus", "G7 Plus"] },
+            { model: "LG X6", compatible: ["MOTO ONE ZOOM", "LG K50", "LG Q60", "LG K12 PRIME", "A20", "REALME C6 PRO"] },
+            { model: "LG Q60", compatible: ["MOTO ONE ZOOM", "LG K50", "LG X6", "LG K12 PRIME", "A20", "REALME C6 PRO"] },
+            { model: "A33", compatible: ["SAMSUNG M21S", "SAMSUNG M31"] },
+            { model: "MULTILASER G MAX 2", compatible: ["SAMSUNG A03S", "SAMSUNG A13", "SAMSUNG A02s", "REALME C25", "SAMSUNG A02S", "SAMSUNG M12"] },
+            { model: "PHILCO HIT MAX", compatible: ["MOTO E 6 PLUS"] },
+            { model: "SAMSUNG M21S", compatible: ["A30S", "A20", "G8 Plus", "M10s", "A12", "M31"] },
+            { model: "SAMSUNG M31", compatible: ["A30S", "A20", "G8 Plus", "M10s", "A12"] },
+            { model: "XIAOMI REDMI 9", compatible: ["SAMSUNG M21S", "SAMSUNG M31"] },
+            { model: "LG K12 PRIME", compatible: ["MOTO ONE ZOOM", "LG K50", "LG X6", "LG Q60", "LG K12", "A20", "REALME C6 PRO"] },
+            { model: "MOTO G71", compatible: ["A53", "MOTO G41", "A41", "MOTO G52", "G71", "G62", "G53", "G32", "G13", "G22", "G54", "REALME 7 PRO"] },
+            { model: "A73", compatible: ["M51", "A21S", "A21", "MOTO G52", "XIAOMI 10 T", "XIAOMI 11 LITE", "XIAOMI 10T", "POCO F3", "XIAOMI X3"] },
+            { model: "XIAOMI X3", compatible: ["XIAOMI 1OT", "POCO M3 PRO", "XIAOMI MI 11i"] },
+            { model: "K51S", compatible: ["XIAOMI 1OT", "XIAOMI MI 11i"] },
+            { model: "SAMSUNG A11", compatible: ["G41", "G51", "G5", "REDMI NOTE 10", "XIAOMI 11 LITE", "MOTO G52", "REALME 7 PRO", "XIAOMI 11 LITE"] },
+            { model: "MOTO G STYLUS", compatible: ["MOTO G8 POWER"] },
+            { model: "XIAOMI MI 11 LITE", compatible: ["A52", "G52", "A53", "POCO M3 PRO", "G8 POWER", "G82", "NOTE10S", "REALME 7PRO", "REDMI NOTE 10", "NOTE 10 PRO"] },
+            { model: "MOTOROLA MOTO ONE FUSION PLUS", compatible: ["A53", "M52"] },
+            { model: "SAMSUNG A53", compatible: ["REDMI NOTE 10", "a52", "RM NOTE 10 4G", "RM NOTE 10 S"] },
+            { model: "POCO M3 PRO", compatible: ["G41", "G52", "REDMI NOTE 10", "A52", "A11", "XIAOMI 11 LITE"] },
+            { model: "XIAOMI MI 11i", compatible: ["A11", "A52", "S20 FE", "XIAOMI 11 LITE", "POCO F3", "MOTO ONE HYPER"] },
+            { model: "TCL 5130i", compatible: ["A10", "A20", "MOTO G7", "MOTO G8 PLUS"] },
+            { model: "REALME X50", compatible: ["G71", "A53", "G52", "G41", "REALME 6 PRO", "PCOM3PRO 5G"] },
+            { model: "MOTO G60S", compatible: ["MOTO G200", "G40 FUSION", "REDMI 10 C"] },
+            { model: "K22", compatible: ["s20 fe", "A20"] },
+            { model: "POCO M2", compatible: ["A22", "A33", "A32"] },
+            { model: "M23", compatible: ["A22", "REALME C11", "A03", "A02", "A02 CORE", "A02S", "A03S", "A03 CORE"] },
+            { model: "MOTO G82", compatible: ["MOTO G52", "G32", "A52", "A53", "S21 FE", "REDIMI NOTE 11 4G", "RM NOTE 10 4G", "RM NOTE 10 S"] },
+            { model: "MOTO G62", compatible: ["MOTO G71", "G71", "G53", "G32", "G13", "G22", "G54", "SAMSUNG A52", "RM NOTE 10 4G", "RM NOTE 10 S"] },
+            { model: "MOTO G32", compatible: ["G71", "G62", "G53", "G13", "G22", "G54"] },
+            { model: "MOTO G9 PLAY", compatible: ["A03", "M23", "A12", "A13", "G30", "G50", "E20", "A20S", "E 7 POWER", "ONE FUNSION"] },
+            { model: "SAMSUNG A22 5G", compatible: ["MOTO G50", "MOTO G30", "SAMSUN A12", "SAMSUNG M12", "SAMSUNG A02S"] },
+            { model: "TCL Optus X Go ALCATEL 5007U", compatible: ["SAMSUNG A10", "A20", "MOTO G8", "G7 PLUS"] },
+            { model: "MOTO G10", compatible: ["MOTO E20", "ONE FUSIO", "G20", "G30", "G9 PLAY", "E7 PLUS", "E7 PLAY", "A02S"] },
+            { model: "MOTO G20", compatible: ["MOTO E20", "ONE FUSIO", "G20", "G30", "G9 PLAY", "E7 PLUS", "E7 PLAY", "A02S", "G1O"] },
+            { model: "POCO X4 PRO", compatible: ["POCO X3", "REDMI NOTE 10", "MI POCO F3", "EDGE X30 PRO", "MOTO G62", "RM NOTE 10 PRO", "MI 11 i", "A11", "G71"] },
+            { model: "MOTO G42", compatible: ["G41", "G52", "G71", "A53", "REDMI NOTE 10", "A11"] },
+            { model: "MOTO G73", compatible: ["MOTO G8", "POCO M3", "XIAMI 11 LITE", "REDMI NOTE 11", "REDMI NOTE 10", "POCO X4", "RELME 7 PRO", "SAMSUNG A52"] },
+            { model: "MOTO E13", compatible: ["MOTO G30", "G10", "G30", "SAMSUNG A23", "E20", "ONE FUSION", "G50"] },
+            { model: "SAMSUNG A04", compatible: ["SAMSUNG A03", "A03S", "A03 CORE", "AO2", "AO2S", "AO2 CORE", "A12", "A04E", "A04 CORE"] },
+            { model: "SAMSUNG A04E", compatible: ["SAMSUNG A03", "A03S", "A03 CORE", "AO2", "AO2S", "AO2 CORE", "A12"] },
+            { model: "SAMSUNG A04S", compatible: ["SAMSUNG A03", "A03S", "A03 CORE", "AO2", "AO2S", "AO2 CORE", "A12"] },
+            { model: "SAMSUNG A14", compatible: ["A05", "A05S", "M14", "MOTO G50", "MOTO E20", "E7 PLUS", "E7 POWER", "G9 NPLAY", "G20", "G30", "G10", "SAMSUNG A22", "SAMSUNG A13", "A02", "A03", "A04"] },
+            { model: "MOTOROLA MOTO E22", compatible: ["K41S", "ONE FUSION", "MOTO G30", "E7 PLUS", "A02S", "REALME C25", "REALME C11", "SAMSUNG A23", "E 20", "G20", "E13"] },
+            { model: "SAMSUNG A32 4G", compatible: ["SAMSUNG A22 4G", "M32", "A33", "M31"] },
+            { model: "IPHONE 16", compatible: ["IPHONE 15", "IPHONE 15 PRO"] },
+            { model: "IPHONE 15 PLUS", compatible: ["IPHONE 14 PRO MAX", "IPHONE 13 PRO MAX", "IPHONE 15 PRO MAX"] },
+            { model: "MOTO G54", compatible: ["G34", "G54", "G71", "G62", "G53", "G32", "G13", "G22", "G14"] },
+            { model: "A05S", compatible: ["REDMI 13C", "POCO C65", "A05", "A06"] },
+            { model: "A05", compatible: ["REDMI 13C", "POCO C65", "A05S", "A06"] },
+            { model: "MOTO G34", compatible: ["A21", "G13", "G14", "G54", "G62", "G84"] },
+            { model: "MOTO G24", compatible: ["G04", "MOTO G13", "G14", "G23", "G53", "G62", "G54", "G73"] },
+            { model: "MOTO G04S", compatible: ["G62", "G24", "G73", "G32", "G13", "G23", "REDMI NOTE 13"] },
+            { model: "MOTO G04", compatible: ["G62", "G24", "G73", "G32", "G13", "G23"] },
+            { model: "A15", compatible: ["A24", "M34", "A25"] },
+            { model: "TECNO POVA 5", compatible: ["MOTO G60"] },
+            { model: "REDMI A2", compatible: ["MOTO G8 POWER LITE"] },
+            { model: "IPHONE X", compatible: ["XS", "11 PRO", "A01 CORE"] },
+            { model: "IPHONE XS MAX", compatible: ["11 PRO MAX"] },
+            { model: "IPHONE XR", compatible: ["11", "LG K8 PLUS"] }
+        ];
+
+        let editingProduct = null;
+        let isLoggedIn = false;
+
+        // Funções de Login
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414L8.464 8.464m5.656 5.656l1.415 1.415m-1.415-1.415l1.415 1.415M14.828 14.828L16.243 16.243"></path>';
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+            }
+        }
+
+        function login(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Verificar credenciais
+            if (username === 'admin' && password === 'admin') {
+                isLoggedIn = true;
+                localStorage.setItem('isLoggedIn', 'true');
+                
+                // Esconder tela de login e mostrar aplicação
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                
+                // Inicializar aplicação
+                loadDatabase();
+                updateMarginAndCalculate();
+                
+                errorMessage.classList.add('hidden');
+            } else {
+                // Mostrar erro
+                errorMessage.classList.remove('hidden');
+                
+                // Limpar campos
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                
+                // Focar no campo de usuário
+                document.getElementById('username').focus();
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            localStorage.removeItem('isLoggedIn');
+            
+            // Mostrar tela de login e esconder aplicação
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            
+            // Limpar campos de login
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        // Verificar se já está logado ao carregar a página
+        function checkLoginStatus() {
+            const savedLoginStatus = localStorage.getItem('isLoggedIn');
+            
+            if (savedLoginStatus === 'true') {
+                isLoggedIn = true;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                loadDatabase();
+                updateMarginAndCalculate();
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+            }
+        }
+
+        // Função para alternar entre abas
+        function switchTab(tabName) {
+            // Esconder todas as abas
+            document.getElementById('calculator-tab').classList.add('hidden');
+            document.getElementById('tips-tab').classList.add('hidden');
+            document.getElementById('films-tab').classList.add('hidden');
+            
+            // Remover classe ativa de todas as abas
+            document.getElementById('tab-calculator').className = 'px-6 py-3 text-sm font-medium text-gray-300 tab-inactive rounded-t-lg';
+            document.getElementById('tab-tips').className = 'px-6 py-3 text-sm font-medium text-gray-300 tab-inactive rounded-t-lg ml-2';
+            document.getElementById('tab-films').className = 'px-6 py-3 text-sm font-medium text-gray-300 tab-inactive rounded-t-lg ml-2';
+            
+            // Mostrar aba selecionada e ativar botão
+            if (tabName === 'calculator') {
+                document.getElementById('calculator-tab').classList.remove('hidden');
+                document.getElementById('tab-calculator').className = 'px-6 py-3 text-sm font-medium text-white tab-active rounded-t-lg';
+            } else if (tabName === 'tips') {
+                document.getElementById('tips-tab').classList.remove('hidden');
+                document.getElementById('tab-tips').className = 'px-6 py-3 text-sm font-medium text-white tab-active rounded-t-lg ml-2';
+            } else if (tabName === 'films') {
+                document.getElementById('films-tab').classList.remove('hidden');
+                document.getElementById('tab-films').className = 'px-6 py-3 text-sm font-medium text-white tab-active rounded-t-lg ml-2';
+            }
+        }
+
+        // Função para calcular margem sugerida baseada no valor da peça
+        function getSuggestedMargin(valor) {
+            if (valor <= 100) return 65;
+            if (valor <= 200) return 70;
+            if (valor <= 300) return 75;
+            if (valor <= 400) return 80;
+            if (valor <= 500) return 95;
+            return 100;
+        }
+
+        // Função para sugerir mão de obra baseada no valor da peça
+        function getSuggestedLabor(valor) {
+            if (valor <= 100) return "R$ 80-120 (Simples)";
+            if (valor <= 200) return "R$ 100-140 (Médio)";
+            if (valor <= 300) return "R$ 120-160 (Médio)";
+            if (valor <= 400) return "R$ 140-180 (Complexo)";
+            if (valor <= 500) return "R$ 160-200 (Complexo)";
+            return "R$ 180-250 (Premium)";
+        }
+
+        // Atualizar margem e calcular valores
+        function updateMarginAndCalculate() {
+            const valorPeca = parseFloat(document.getElementById('valorPeca').value) || 0;
+            const suggestedMargin = getSuggestedMargin(valorPeca);
+            const suggestedLabor = getSuggestedLabor(valorPeca);
+            
+            // Atualizar sugestões visuais
+            document.getElementById('marginSuggestion').textContent = `(Sugerido: ${suggestedMargin}%)`;
+            document.getElementById('laborSuggestion').textContent = `(${suggestedLabor})`;
+            
+            // Aplicar margem sugerida automaticamente
+            document.getElementById('margemLucro').value = suggestedMargin;
+            
+            calculateValues();
+        }
+
+        // Carregar dados do localStorage
+        function loadDatabase() {
+            const saved = localStorage.getItem('pricing-calculator-database');
+            if (saved) {
+                localDatabase = JSON.parse(saved);
+            } else {
+                localDatabase = [...initialDatabase];
+                saveDatabase();
+            }
+        }
+
+        // Salvar dados no localStorage
+        function saveDatabase() {
+            localStorage.setItem('pricing-calculator-database', JSON.stringify(localDatabase));
+        }
+
+        // Formatar moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        // Calcular valores
+        function calculateValues() {
+            const valorPeca = parseFloat(document.getElementById('valorPeca').value) || 0;
+            const margemLucro = parseFloat(document.getElementById('margemLucro').value) || 0;
+            const frete = parseFloat(document.getElementById('frete').value) || 0;
+            const maoDeObra = parseFloat(document.getElementById('maoDeObra').value) || 0;
+            const taxaMaquina = parseFloat(document.getElementById('taxaMaquina').value) || 0;
+            const imposto = parseFloat(document.getElementById('imposto').value) || 0;
+
+            // Custo = valor da peça + frete + imposto
+            const custoTotal = valorPeca + frete + (valorPeca * imposto) / 100;
+            
+            // À vista = custo total + margem de lucro + mão de obra
+            const aVista = custoTotal * (1 + margemLucro / 100) + maoDeObra;
+            
+            // No cartão = valor à vista + taxa da máquina
+            const noCartao = aVista * (1 + taxaMaquina / 100);
+            
+            const diferenca = noCartao - aVista;
+
+            document.getElementById('valorFinalPeca').textContent = formatCurrency(custoTotal);
+            document.getElementById('valorAVista').textContent = formatCurrency(aVista);
+            document.getElementById('valorNoCartao').textContent = formatCurrency(noCartao);
+            document.getElementById('diferenca').textContent = formatCurrency(diferenca);
+        }
+
+        // Pesquisar preços
+        async function searchPrices() {
+            const nomePeca = document.getElementById('nomePeca').value.trim();
+            if (!nomePeca) {
+                alert('Por favor, digite o nome da peça!');
+                return;
+            }
+
+            const searchBtn = document.getElementById('searchBtn');
+            const searchStatus = document.getElementById('searchStatus');
+            const searchResults = document.getElementById('searchResults');
+
+            // Mostrar loading
+            searchBtn.innerHTML = '<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+            searchStatus.classList.remove('hidden');
+            searchResults.classList.add('hidden');
+
+            // Simular delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Buscar produtos
+            const foundProducts = localDatabase.filter(product => 
+                product.produto.toLowerCase().includes(nomePeca.toLowerCase())
+            );
+
+            // Restaurar botão
+            searchBtn.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>';
+            searchStatus.classList.add('hidden');
+            searchResults.classList.remove('hidden');
+
+            if (foundProducts.length > 0) {
+                showSearchResults(foundProducts, nomePeca);
+            } else {
+                showNoResults(nomePeca);
+            }
+        }
+
+        // Mostrar resultados encontrados
+        function showSearchResults(products, searchTerm) {
+            const searchResults = document.getElementById('searchResults');
+            
+            let html = `
+                <div class="bg-green-900/20 border border-green-700 p-4 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h4 class="text-md font-medium text-white">
+                            Encontrados ${products.length} produtos para "${searchTerm}"
+                        </h4>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 max-h-80 overflow-y-auto">
+            `;
+
+            products.forEach((product, index) => {
+                html += `
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex-1 mr-4">
+                                <h5 class="text-white font-medium text-sm leading-tight mb-1">${product.produto}</h5>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-1">
+                                        ${product.disponivel ? 
+                                            '<svg class="h-3 w-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-xs text-green-400">Disponível</span>' :
+                                            '<svg class="h-3 w-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="text-xs text-red-400">Não disponível</span>'
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right flex items-center gap-2">
+                                <span class="text-white font-bold text-lg">${formatCurrency(product.preco)}</span>
+                                <button onclick="openEditModal(${index})" class="p-1 hover:bg-gray-700 rounded">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+                <button onclick="applyAveragePrice()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md">
+                    Usar Preço Médio dos Produtos Encontrados
+                </button>
+            `;
+
+            searchResults.innerHTML = html;
+        }
+
+        // Mostrar quando não encontra resultados
+        function showNoResults(searchTerm) {
+            const searchResults = document.getElementById('searchResults');
+            
+            searchResults.innerHTML = `
+                <div class="bg-red-900/20 border border-red-700 p-4 rounded-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h4 class="text-md font-medium text-white">Não encontramos "${searchTerm}"</h4>
+                    </div>
+                    <button onclick="openAddModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md flex items-center justify-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Adicionar Nova Peça
+                    </button>
+                </div>
+            `;
+        }
+
+        // Aplicar preço médio
+        function applyAveragePrice() {
+            const nomePeca = document.getElementById('nomePeca').value.trim();
+            const foundProducts = localDatabase.filter(product => 
+                product.produto.toLowerCase().includes(nomePeca.toLowerCase())
+            );
+
+            if (foundProducts.length > 0) {
+                const availableProducts = foundProducts.filter(p => p.disponivel);
+                let average;
+                
+                if (availableProducts.length > 0) {
+                    average = availableProducts.reduce((sum, product) => sum + product.preco, 0) / availableProducts.length;
+                } else {
+                    average = foundProducts.reduce((sum, product) => sum + product.preco, 0) / foundProducts.length;
+                }
+
+                document.getElementById('valorPeca').value = Math.round(average * 100) / 100;
+                updateMarginAndCalculate();
+                
+                // Limpar busca
+                document.getElementById('nomePeca').value = '';
+                document.getElementById('searchResults').classList.add('hidden');
+            }
+        }
+
+        // Modais
+        function openPDFModal() {
+            document.getElementById('pdfModal').classList.remove('hidden');
+        }
+
+        function closePDFModal() {
+            document.getElementById('pdfModal').classList.add('hidden');
+            document.getElementById('nomeEmpresa').value = '';
+            document.getElementById('servico').value = '';
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
+        }
+
+        function openEditModal(index) {
+            const nomePeca = document.getElementById('nomePeca').value.trim();
+            const foundProducts = localDatabase.filter(product => 
+                product.produto.toLowerCase().includes(nomePeca.toLowerCase())
+            );
+            
+            editingProduct = foundProducts[index];
+            document.getElementById('editProductName').textContent = `Produto: ${editingProduct.produto}`;
+            document.getElementById('editProductPrice').value = editingProduct.preco;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            editingProduct = null;
+            document.getElementById('editProductPrice').value = '';
+        }
+
+        // Adicionar novo produto
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value.trim();
+            const price = document.getElementById('newProductPrice').value.trim();
+
+            if (!name || !price) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            const newProduct = {
+                produto: name,
+                preco: parseFloat(price),
+                disponivel: true,
+                pagina: 1
+            };
+
+            localDatabase.push(newProduct);
+            saveDatabase();
+
+            // Aplicar preço automaticamente
+            document.getElementById('valorPeca').value = newProduct.preco;
+            updateMarginAndCalculate();
+
+            closeAddModal();
+        }
+
+        // Editar produto
+        function editProduct() {
+            const newPrice = document.getElementById('editProductPrice').value.trim();
+
+            if (!editingProduct || !newPrice) {
+                alert('Por favor, preencha o preço!');
+                return;
+            }
+
+            // Encontrar e atualizar o produto no banco de dados
+            const productIndex = localDatabase.findIndex(p => p.produto === editingProduct.produto);
+            if (productIndex !== -1) {
+                localDatabase[productIndex].preco = parseFloat(newPrice);
+                saveDatabase();
+            }
+
+            closeEditModal();
+            
+            // Atualizar resultados da busca se estiver visível
+            const searchResults = document.getElementById('searchResults');
+            if (!searchResults.classList.contains('hidden')) {
+                searchPrices();
+            }
+        }
+
+        // Gerar PDF
+        async function gerarPDF() {
+            const nomeEmpresa = document.getElementById('nomeEmpresa').value.trim();
+            const servico = document.getElementById('servico').value.trim();
+
+            if (!nomeEmpresa || !servico) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.width;
+            const margin = 20;
+
+            // Data atual
+            const dataAtual = new Date().toLocaleDateString('pt-BR');
+            const dataValidade = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
+
+            // Configurar fonte
+            doc.setFont('helvetica');
+
+            // Linha superior
+            doc.setLineWidth(0.5);
+            doc.line(margin, 25, pageWidth - margin, 25);
+
+            // Nome da empresa (destaque)
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            const empresaWidth = doc.getTextWidth(nomeEmpresa);
+            doc.text(nomeEmpresa, (pageWidth - empresaWidth) / 2, 35);
+
+            // Linha inferior do cabeçalho
+            doc.line(margin, 45, pageWidth - margin, 45);
+
+            // Corpo do orçamento
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+
+            let yPosition = 65;
+
+            doc.text('Prezado(a) cliente,', margin, yPosition);
+            yPosition += 15;
+
+            doc.text('Segue abaixo o orçamento referente ao serviço solicitado:', margin, yPosition);
+            yPosition += 20;
+
+            // Serviço
+            doc.setFont('helvetica', 'bold');
+            doc.text('Serviço:', margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(servico, margin + 20, yPosition);
+            yPosition += 20;
+
+            // Valores
+            doc.setFont('helvetica', 'bold');
+            doc.text('Valor à vista:', margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(document.getElementById('valorAVista').textContent, margin + 30, yPosition);
+            yPosition += 15;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('Valor no cartão:', margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(document.getElementById('valorNoCartao').textContent, margin + 35, yPosition);
+            yPosition += 25;
+
+            // Texto explicativo
+            const textoExplicativo = [
+                'Este orçamento inclui todos os custos envolvidos na prestação do serviço,',
+                'garantindo qualidade, agilidade e transparência no atendimento.',
+                '',
+                'Agradecemos pela confiança e estamos à disposição para qualquer',
+                'dúvida ou esclarecimento.'
+            ];
+
+            textoExplicativo.forEach(linha => {
+                doc.text(linha, margin, yPosition);
+                yPosition += 8;
+            });
+
+            yPosition += 15;
+
+            // Assinatura
+            doc.setFont('helvetica', 'bold');
+            doc.text('Atenciosamente,', margin, yPosition);
+            yPosition += 10;
+            doc.text(`Equipe ${nomeEmpresa}`, margin, yPosition);
+
+            // Rodapé com informações
+            yPosition = doc.internal.pageSize.height - 40;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Data do orçamento: ${dataAtual}`, margin, yPosition);
+            doc.text(`Válido até: ${dataValidade}`, margin, yPosition + 8);
+
+            // Salvar o PDF
+            doc.save(`Orçamento_${nomeEmpresa.replace(/\s+/g, '_')}_${dataAtual.replace(/\//g, '-')}.pdf`);
+
+            closePDFModal();
+        }
+
+        // Função para buscar películas compatíveis
+        async function searchFilms() {
+            const searchTerm = document.getElementById('filmSearch').value.trim();
+            if (!searchTerm) {
+                alert('Por favor, digite o modelo do celular!');
+                return;
+            }
+
+            const searchBtn = document.getElementById('filmSearchBtn');
+            const searchStatus = document.getElementById('filmSearchStatus');
+            const searchResults = document.getElementById('filmSearchResults');
+
+            // Mostrar loading
+            searchBtn.innerHTML = '<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+    searchStatus.classList.remove('hidden');
+    searchResults.classList.add('hidden');
+
+    // Simular delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Buscar compatibilidade
+    const foundFilms = filmsDatabase.filter(film => 
+        film.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        film.compatible.some(comp => comp.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    // Restaurar botão
+    searchBtn.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>';
+    searchStatus.classList.add('hidden');
+    searchResults.classList.remove('hidden');
+
+    if (foundFilms.length > 0) {
+        showFilmResults(foundFilms, searchTerm);
+    } else {
+        showNoFilmResults(searchTerm);
+    }
+}
+
+// Mostrar resultados de películas encontradas
+function showFilmResults(films, searchTerm) {
+    const searchResults = document.getElementById('filmSearchResults');
+    
+    let html = `
+        <div class="bg-green-900/20 border border-green-700 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h4 class="text-md font-medium text-white">
+                    Encontradas ${films.length} compatibilidades para "${searchTerm}"
+                </h4>
+            </div>
+        </div>
+        
+        <div class="space-y-4 max-h-96 overflow-y-auto">
+    `;
+
+    films.forEach((film, index) => {
+        html += `
+            <div class="bg-gray-800 p-4 rounded-lg border-l-4 border-purple-500">
+                <div class="mb-3">
+                    <h5 class="text-white font-semibold text-lg mb-2 flex items-center gap-2">
+                        <svg class="h-4 w-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        ${film.model}
+                    </h5>
+                    <p class="text-gray-400 text-sm mb-3">Película compatível com:</p>
+                    <div class="flex flex-wrap gap-2">
+        `;
+        
+        film.compatible.forEach(compatible => {
+            html += `
+                <span class="bg-purple-900/30 text-purple-200 px-2 py-1 rounded-md text-xs border border-purple-700">
+                    ${compatible}
+                </span>
+            `;
+        });
+        
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    searchResults.innerHTML = html;
+}
+
+// Mostrar quando não encontra películas
+function showNoFilmResults(searchTerm) {
+    const searchResults = document.getElementById('filmSearchResults');
+    
+    searchResults.innerHTML = `
+        <div class="bg-red-900/20 border border-red-700 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h4 class="text-md font-medium text-white">Nenhuma compatibilidade encontrada para "${searchTerm}"</h4>
+            </div>
+            <p class="text-gray-400 text-sm mt-2">
+                Tente buscar por outro modelo ou verifique a grafia. Ex: "A22", "iPhone 11", "Moto G52"
+            </p>
+        </div>
+    `;
+}
+
+        // Event listeners
+        document.getElementById('loginForm').addEventListener('submit', login);
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+        });
+    </script>
+</body>
+</html>
